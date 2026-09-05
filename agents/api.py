@@ -3,9 +3,9 @@ FastAPI REST API Server for Plasmid Sequence Verification Agent.
 """
 from typing import Dict, Any, List
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from .base import AuditLogger, PHIGuard
-from .models import SystemTaskPayload, ConsensusDossier
+from pydantic import BaseModel, Field
+from .base import AuditLogger, PHIGuard, SecurityException
+from .models import SystemTaskPayload, ConsensusDossier, MAX_DESCRIPTOR_LENGTH
 from .supervisor import SystemSupervisor
 
 supervisor = SystemSupervisor(model_provider="mock")
@@ -18,7 +18,7 @@ app = FastAPI(
 
 
 class ChatRequest(BaseModel):
-    query: str
+    query: str = Field(..., max_length=MAX_DESCRIPTOR_LENGTH, description="Supervisory query")
 
 
 @app.get("/health")
@@ -37,8 +37,11 @@ def metrics():
 
 @app.post("/api/audit")
 def api_audit(payload: SystemTaskPayload):
-    dossier = supervisor.process_task(payload)
-    return dossier.to_dict()
+    try:
+        dossier = supervisor.process_task(payload)
+        return dossier.to_dict()
+    except SecurityException as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 
 @app.post("/api/chat")
@@ -46,6 +49,8 @@ def api_chat(req: ChatRequest):
     try:
         ans = supervisor.query_supervisory_chat(req.query)
         return {"response": ans}
+    except SecurityException as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

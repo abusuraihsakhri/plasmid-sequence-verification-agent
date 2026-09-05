@@ -3,16 +3,18 @@ Automated Pytest Test Suite for Plasmid Sequence Verification Agent.
 Domain: Clinical & Biomedical AI
 Standard: CAP / CLSI / ISO Standards
 """
+import os
 import sys
+import tempfile
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-from agents.base import PHIGuard, AuditLogger, SecurityException
-from agents.models import SystemTaskPayload, UrgencyLevel, SystemIntegrityStatus
+from agents.base import PHIGuard, AuditLogger, SecurityException, AuditTrail
+from agents.models import SystemTaskPayload, UrgencyLevel, SystemIntegrityStatus, MAX_ID_LENGTH, MAX_DESCRIPTOR_LENGTH
 from agents.workers import InvariantQCWorker, SafetyEscalationWorker, ProtocolConformanceWorker
 from agents.supervisor import SystemSupervisor
-from cli import main
+from cli import main, _resolve_safe_path
 
 
 def test_phi_guard_enforcement():
@@ -63,3 +65,70 @@ def test_supervisor_consensus_and_audit():
     assert main(["audit", "--task-id", "CLI-TEST-01"]) == 0
     assert main(["chat", "Explain", "specifications"]) == 0
     assert main(["verify-audit"]) == 0
+
+
+def test_input_length_validation():
+    """Ensure oversized identifiers are rejected by the model validator."""
+    with pytest.raises(Exception):
+        SystemTaskPayload(task_id="X" * (MAX_ID_LENGTH + 1), target_identifier="KEY-01", primary_metric=10.0)
+
+    with pytest.raises(Exception):
+        SystemTaskPayload(task_id="T1", target_identifier="KEY-01", primary_metric=10.0,
+                          status_descriptor="D" * (MAX_DESCRIPTOR_LENGTH + 1))
+
+
+def test_whitespace_only_rejected():
+    """Whitespace-only identifiers should be rejected."""
+    with pytest.raises(Exception):
+        SystemTaskPayload(task_id="   ", target_identifier="KEY-01", primary_metric=10.0)
+
+
+def test_batch_csv_processing():
+    """Test batch CLI command with a valid CSV file."""
+    csv_content = "task_id,target_identifier,primary_metric,secondary_metric,is_critical_flag,status_descriptor\nTASK-B1,TARGET-B1,28.4,14.2,True,DISCORDANT\nTASK-B2,TARGET-B2,12.0,4.1,False,NOMINAL\n"
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False, encoding="utf-8") as f:
+        f.write(csv_content)
+        input_path = f.name
+
+    output_path = input_path.replace(".csv", "_out.csv")
+    try:
+        ret = main(["batch", "-i", input_path, "-o", output_path])
+        assert ret == 0
+        assert os.path.exists(output_path)
+        with open(output_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        assert "overall_urgency" in content
+    finally:
+        os.unlink(input_path)
+        if os.path.exists(output_path):
+            os.unlink(output_path)
+
+
+def test_batch_missing_file():
+    """Test batch CLI command with a nonexistent file."""
+    ret = main(["batch", "-i", "/nonexistent/path/file.csv"])
+    assert ret == 1
+
+
+def test_audit_trail_random_key_generation():
+    """AuditTrail should generate a random key when no secret is provided."""
+    trail = AuditTrail(secret_key=None)
+    assert len(trail.secret_key) > 0
+    entry = trail.log("test", "test_tier", "TEST_EVENT", {"k": "v"})
+    assert entry["current_hash"] != ""
+    assert trail.verify_integrity() is True
+
+
+def test_safe_path_resolution():
+    """_resolve_safe_path should resolve paths correctly."""
+    cwd = os.getcwd()
+    resolved = _resolve_safe_path("test.csv")
+    assert resolved == Path(cwd) / "test.csv"
+
+
+def test_phi_redaction():
+    """PHIGuard.redact_phi should mask sensitive patterns."""
+    redacted = PHIGuard.redact_phi("Contact patient at 555-123-4567 or MRN-12345")
+    assert "555-123-4567" not in redacted
+    assert "MRN-12345" not in redacted
+    assert "[REDACTED_IDENTIFIER]" in redacted
