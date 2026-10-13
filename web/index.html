@@ -137,6 +137,10 @@ function render(report) {
   byId('mismatchSection').hidden = report.mismatches.length === 0;
   byId('truncated').textContent = report.mismatches_truncated ? 'First 500 substitutions shown.' : '';
 }
+for (const id of ['reference', 'observed']) {
+  byId(id).addEventListener('input', () => showError(''));
+}
+byId('circular').addEventListener('change', () => showError(''));
 byId('compare').addEventListener('click', () => {
   try {
     render(PlasmidSequence.verifySequences(byId('reference').value, byId('observed').value, {circular: byId('circular').checked}));
