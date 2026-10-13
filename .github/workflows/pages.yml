@@ -1,0 +1,47 @@
+name: Deploy browser application to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify deployed HTML and JavaScript
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -e
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsSL --max-time 15 "$PAGE_URL" -o /tmp/plasmid-page.html &&
+               grep -q 'Plasmid Sequence Verification' /tmp/plasmid-page.html &&
+               curl -fsSL --max-time 15 "${PAGE_URL%/}/sequence.js" -o /tmp/plasmid-sequence.js &&
+               grep -q 'verifySequences' /tmp/plasmid-sequence.js; then
+              echo "Deployed app assets verified"
+              exit 0
+            fi
+            sleep 4
+          done
+          echo "Deployed app asset smoke test failed" >&2
+          exit 1

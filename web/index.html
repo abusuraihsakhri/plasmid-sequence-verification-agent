@@ -1,236 +1,178 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plasmid Sequence Verification Engine — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Plasmid Sequence Verification</title>
+<style>
+:root { font-family: system-ui, -apple-system, Segoe UI, sans-serif; color-scheme: dark;
+  --bg:#0b1220;--surface:#151e30;--stroke:#354159;--text:#f3f7ff;
+  --muted:#b8c6dc;--brand:#7db7ff;--good:#77d6a5;--bad:#ffc58b }
+*{box-sizing:border-box}body{margin:0;color:var(--text);background:var(--bg);line-height:1.5}
+.container{max-width:1120px;margin:auto;padding:28px 20px 60px}
+header{padding-bottom:20px;border-bottom:1px solid var(--stroke);margin-bottom:24px}
+h1{margin:0 0 5px;font-size:clamp(1.55rem,3vw,2.1rem)}
+h2{font-size:1.12rem;margin:0 0 16px}
+p{margin:6px 0 12px}.muted,small{color:var(--muted)}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--surface);border:1px solid var(--stroke);border-radius:12px;padding:22px;min-width:0}
+label{font-weight:600;display:block;margin:0 0 7px}
+textarea{width:100%;min-height:205px;padding:11px;resize:vertical;font:.88rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+textarea,input[type=file]{background:#0b1220;color:var(--text);border:1px solid #6a7990;border-radius:7px}
+textarea:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+input[type=file]{width:100%;padding:10px;margin-top:12px;font-size:.82rem}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0}
+button{border:1px solid var(--brand);border-radius:7px;padding:11px 17px;font:inherit;font-weight:650;color:#071523;background:var(--brand);cursor:pointer}
+button.secondary{background:transparent;color:var(--brand)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.option{display:inline-flex;gap:8px;align-items:center;margin-right:auto;cursor:pointer}
+.option input{width:17px;height:17px}
+#error{color:#ffd1c3;margin:0 0 18px;font-weight:600}
+#results[hidden],#error[hidden]{display:none}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0 20px}
+.stat{border:1px solid var(--stroke);padding:12px;border-radius:8px}
+.stat span{display:block;color:var(--muted);font-size:.8rem}
+.stat strong{font-size:1.1rem;overflow-wrap:anywhere}
+#status{font-weight:750;font-size:1.15rem}.pass{color:var(--good)}.review{color:var(--bad)}
+.scroll{overflow-x:auto;max-height:320px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;text-align:left}
+th,td{padding:8px 12px;border-bottom:1px solid var(--stroke)}th{color:var(--muted)}
+footer{margin-top:25px;padding-top:15px;border-top:1px solid var(--stroke);color:var(--muted);font-size:.85rem}
+@media(max-width:760px){.columns{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:16px}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <h1>Plasmid Sequence Verification Engine</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Plasmid Sequence Verification Engine Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "plasmid-sequence-verification-engine",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+<main class="container">
+<header>
+<h1>Plasmid Sequence Verification</h1>
+<p class="muted">Compare an expected DNA construct with an observed consensus sequence. Processing runs locally in your browser.</p>
+</header>
+<section class="columns" aria-label="Sequence input">
+<div class="card">
+<h2>1 · Expected sequence</h2>
+<label for="reference">Reference DNA (raw text or single-record FASTA)</label>
+<textarea id="reference" spellcheck="false" placeholder=">expected_plasmid"></textarea>
+<label for="referenceFile">Or load a local file</label>
+<input type="file" id="referenceFile" accept=".fa,.fasta,.fna,.txt,.seq,text/plain">
+</div>
+<div class="card">
+<h2>2 · Observed sequence</h2>
+<label for="observed">Observed consensus DNA (raw text or single-record FASTA)</label>
+<textarea id="observed" spellcheck="false" placeholder=">observed_consensus"></textarea>
+<label for="observedFile">Or load a local file</label>
+<input type="file" id="observedFile" accept=".fa,.fasta,.fna,.txt,.seq,text/plain">
+</div>
+</section>
+<div class="actions">
+<label class="option" for="circular"><input type="checkbox" id="circular"> Allow exact circular rotations</label>
+<button id="compare" type="button">Compare sequences</button>
+<button class="secondary" id="sample" type="button">Load example</button>
+<button class="secondary" id="download" type="button" disabled>Export JSON report</button>
+</div>
+<p id="error" role="alert" hidden></p>
+<section class="card" id="results" aria-live="polite" hidden>
+<h2>Verification report</h2>
+<div id="status"></div>
+<div class="summary">
+<div class="stat"><span>Reference length</span><strong id="refLength">—</strong></div>
+<div class="stat"><span>Observed length</span><strong id="obsLength">—</strong></div>
+<div class="stat"><span>Substitutions</span><strong id="differences">—</strong></div>
+<div class="stat"><span>Identity</span><strong id="identity">—</strong></div>
+</div>
+<p id="alignment"></p>
+<p class="muted" id="note"></p>
+<div id="mismatchSection" hidden>
+<h2>Differences (1-based reference coordinates)</h2>
+<div class="scroll"><table><thead><tr><th>Position</th><th>Expected</th><th>Observed</th></tr></thead><tbody id="mismatchRows"></tbody></table></div>
+<small id="truncated"></small>
+</div>
+</section>
+<footer>
+Supports A, C, G, T, N (N compared literally), single-record FASTA, up to 200,000 bases per input.
+This is an <strong>ungapped consensus comparison</strong>, not read assembly, Sanger trace interpretation,
+indel alignment, annotation, or clinical validation. Only exact circular rotations are recognized.
+No files are uploaded and no results are stored by the app.
+</footer>
+</main>
+<script src="./sequence.js"></script>
+<script>
+(function () {
+'use strict';
+const byId = id => document.getElementById(id);
+let lastReport = null;
+function showError(message) {
+  byId('error').textContent = message;
+  byId('error').hidden = !message;
+  byId('results').hidden = true;
+  byId('download').disabled = true;
+  lastReport = null;
+}
+function render(report) {
+  lastReport = report;
+  byId('error').hidden = true;
+  byId('results').hidden = false;
+  byId('download').disabled = false;
+  const status = byId('status');
+  status.textContent = report.status.replaceAll('_', ' ');
+  status.className = report.status === 'MATCH' ? 'pass' : 'review';
+  byId('refLength').textContent = report.reference_length.toLocaleString();
+  byId('obsLength').textContent = report.observed_length.toLocaleString();
+  byId('differences').textContent = report.mismatch_count === null ? 'Not aligned' : report.mismatch_count.toLocaleString();
+  byId('identity').textContent = report.identity_percent === null ? '—' : report.identity_percent.toFixed(4) + '%';
+  byId('alignment').textContent = report.orientation === null ? 'Orientation: undetermined' :
+    'Orientation: ' + report.orientation.replaceAll('_',' ') + ' · Circular offset: ' + (report.rotation_offset ?? 'not aligned');
+  byId('note').textContent = report.note;
+  const tbody = byId('mismatchRows');
+  tbody.replaceChildren();
+  for (const diff of report.mismatches) {
+    const row = document.createElement('tr');
+    for (const value of [diff.position, diff.reference, diff.observed]) {
+      const cell = document.createElement('td');
+      cell.textContent = String(value);
+      row.appendChild(cell);
+    }
+    tbody.appendChild(row);
+  }
+  byId('mismatchSection').hidden = report.mismatches.length === 0;
+  byId('truncated').textContent = report.mismatches_truncated ? 'First 500 substitutions shown.' : '';
+}
+for (const id of ['reference', 'observed']) {
+  byId(id).addEventListener('input', () => showError(''));
+}
+byId('circular').addEventListener('change', () => showError(''));
+byId('compare').addEventListener('click', () => {
+  try {
+    render(PlasmidSequence.verifySequences(byId('reference').value, byId('observed').value, {circular: byId('circular').checked}));
+  } catch (error) { showError(error.message); }
+});
+byId('sample').addEventListener('click', () => {
+  byId('reference').value = '>expected\nAAACCGTACGTT';
+  byId('observed').value = '>observed\nAAACCGTATGTT';
+  byId('circular').checked = false;
+  showError('');
+});
+for (const [fileId, textId] of [['referenceFile','reference'], ['observedFile','observed']]) {
+  byId(fileId).addEventListener('change', async event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 850000) { showError('File too large (850 KB maximum).'); return; }
+    try { byId(textId).value = await file.text(); showError(''); }
+    catch (_) { showError('Could not read the selected file.'); }
+  });
+}
+byId('download').addEventListener('click', () => {
+  if (!lastReport) return;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)], {type:'application/json'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'plasmid-comparison.json';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+})();
+</script>
 </body>
 </html>
