@@ -29,3 +29,7 @@ plasmid-sequence-verification-engine = "plasmid_check.cli:main"
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/plasmid-sequence-verification-agent"
 Repository = "https://github.com/abusuraihsakhri/plasmid-sequence-verification-agent.git"
+
+[tool.setuptools]
+packages = ["agents", "plasmid_check"]
+py-modules = ["sequence_verification"]
